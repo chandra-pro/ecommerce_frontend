@@ -1,85 +1,86 @@
-import React from "react";
+import React, { useState } from "react";
+import SingleProduct from "./SingleProduct";
+import "../App.css";
 
 const ProductList = ({ state, dispatch }) => {
   const { products, cart } = state;
 
+  const [page, setPage] = useState(1);
+
+  const selectPageHandler = selectedPage => {
+    if (
+      selectedPage >= 1 &&
+      selectedPage <= products.length / 10 &&
+      selectedPage !== page
+    ) {
+      setPage(selectedPage);
+    }
+  };
+
   return (
-    <div
-      className="App"
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-evenly",
-        width: "80%",
-      }}
-    >
-      {products.map(prod => (
-        <div
-          key={prod.id}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            padding: 10,
-            border: "1px solid grey",
-            width: "30%",
-            marginTop: 10,
-            gap: 10,
-          }}
-        >
-          <img
-            src={prod.thumbnail}
-            alt={prod.title}
-            style={{ height: 200, objectFit: "cover" }}
-          />
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span>{prod.title}</span>
-            <b>$ {prod.price}</b>
+    <div>
+      <div
+        className="App"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-evenly",
+          width: "80%",
+        }}
+      >
+        {products.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignContent: "center",
+              alignContent: "center",
+            }}
+          >
+            {products.slice(page * 10 - 10, page * 10).map(prod => {
+              return (
+                <SingleProduct cart={cart} prod={prod} dispatch={dispatch} />
+              );
+            })}
           </div>
-          {cart.some(p => p.id === prod.id) ? (
-            <button
-              style={{
-                padding: 5,
-                border: 0,
-                borderRadius: 5,
-                backgroundColor: "#e53935",
-                color: "white",
-              }}
-              onClick={() =>
-                dispatch({
-                  type: "REMOVE_FROM_CART",
-                  payload: prod,
-                })
+        )}
+        {/* {products.map(prod => (
+        <SingleProduct cart={cart} prod={prod} dispatch={dispatch} />
+      ))} */}
+
+        {products.length > 0 && (
+          <div className="pagination">
+            <span
+              onClick={() => selectPageHandler(page - 1)}
+              className={page > 1 ? "" : "pagination__disable"}
+            >
+              ◀
+            </span>
+
+            {[...Array(products.length / 10)].map((_, i) => {
+              return (
+                <span
+                  key={i}
+                  className={page === i + 1 ? "pagination__selected" : ""}
+                  onClick={() => selectPageHandler(i + 1)}
+                >
+                  {i + 1}
+                </span>
+              );
+            })}
+
+            <span
+              onClick={() => selectPageHandler(page + 1)}
+              className={
+                page < products.length / 10 ? "" : "pagination__disable"
               }
             >
-              Remove from Cart
-            </button>
-          ) : (
-            <button
-              style={{
-                padding: 5,
-                border: 0,
-                borderRadius: 5,
-                backgroundColor: "green",
-                color: "white",
-              }}
-              onClick={() =>
-                dispatch({
-                  type: "ADD_TO_CART",
-                  payload: {
-                    id: prod.id,
-                    title: prod.title,
-                    thumbnail: prod.thumbnail,
-                    qty: prod.qty,
-                    price: prod.price,
-                  },
-                })
-              }
-            >
-              Add to Cart
-            </button>
-          )}
-        </div>
-      ))}
+              ▶
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
